@@ -1,18 +1,3 @@
-// import { IsArray, IsNumber, IsNotEmpty } from 'class-validator';
-
-// export class UpdateAvailabilityDto {
-//   @IsArray()
-//   days: string[];
-
-//   @IsNumber()
-//   @IsNotEmpty()
-//   startHour: number;
-
-//   @IsNumber()
-//   @IsNotEmpty()
-//   endHour: number;
-// }
-
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
