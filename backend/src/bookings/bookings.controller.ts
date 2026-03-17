@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiCreatedResponse, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -17,6 +17,9 @@ export class BookingsController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create a new booking' })
+  @ApiBody({ type: CreateBookingDto })
+  @ApiCreatedResponse({ description: 'Booking created successfully' })
   create(@Req() req: any, @Body() dto: CreateBookingDto) {
     return this.bookingsService.createBooking(req.user.userId, dto);
   }
