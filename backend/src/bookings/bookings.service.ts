@@ -1,10 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Booking, BookingDocument } from './schemas/booking.schema';
-import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
+import { UsersService } from '../users/users.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { Booking, BookingDocument } from './schemas/booking.schema';
 
 @Injectable()
 export class BookingsService {

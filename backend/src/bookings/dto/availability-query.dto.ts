@@ -7,4 +7,4 @@ export class AvailabilityQueryDto {
   @IsDateString()
   @IsNotEmpty()
   date: string;
-}
+};
