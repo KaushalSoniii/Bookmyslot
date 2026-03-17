@@ -35,7 +35,7 @@ export class UsersService {
     if (role) filter.role = role;
 
     const [field, order] = sort.split(':');
-    const sortObj = { [field]: order === 'desc' ? -1 : 1 };
+    const sortObj: Record<string, 1 | -1> = { [field]: order === 'desc' ? -1 : 1 };
 
     const skip = (Number(page) - 1) * Number(limit);
 
