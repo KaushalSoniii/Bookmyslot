@@ -77,17 +77,27 @@ export class BookingsService {
     });
 
     // Send emails
-    await this.mailService.sendBookingConfirmation(client.email, {
-      startTime: booking.startTime,
-      endTime: booking.endTime,
-      otherParty: provider.name,
-    });
+    await this.mailService.sendBookingConfirmation(
+      client.email,
+      {
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        providerName: provider.name,
+        clientName: client.name,   
+      },
+      'client'          
+    );
 
-    await this.mailService.sendBookingConfirmation(provider.email, {
-      startTime: booking.startTime,
-      endTime: booking.endTime,
-      otherParty: client.name,
-    });
+    await this.mailService.sendBookingConfirmation(
+      provider.email,
+      {
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        providerName: provider.name,
+        clientName: client.name,
+      },
+      'provider'  
+    );
 
     return booking;
   }
