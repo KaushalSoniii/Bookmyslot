@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { User } from '@/types';
+import { User } from '../../types/index';
 import Link from 'next/link';
 
 export default function ProvidersPage() {
@@ -37,7 +37,7 @@ export default function ProvidersPage() {
       {/* Filters */}
       <div className="flex gap-4 mb-6">
         <Input placeholder="Search name/email..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-80" />
-        <Select value={sort} onValueChange={setSort}>
+        <Select value={sort} onValueChange={(value) => setSort(value || 'name:asc')}>
           <SelectTrigger className="w-52">
             <SelectValue />
           </SelectTrigger>
