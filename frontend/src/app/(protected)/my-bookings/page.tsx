@@ -225,13 +225,9 @@ function CancelConfirmationDialog({
   return (
     <Dialog>
       <DialogTrigger>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-        >
+        <button className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 w-10 text-destructive hover:text-destructive/90 hover:bg-destructive/10">
           <Trash2 className="h-4 w-4" />
-        </Button>
+        </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
