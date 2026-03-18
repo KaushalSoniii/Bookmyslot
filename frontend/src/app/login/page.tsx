@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { User, Mail, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const schema = z.object({
   name: z.string().min(3).optional(),
@@ -24,26 +25,65 @@ type FormData = z.infer<typeof schema>;
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
   const { login } = useAuth();
-
+  const router = useRouter();
   const { register, handleSubmit, setValue, watch } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { role: 'client' },
   });
+  const { reset } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { role: 'client' },
+  }); 
 
   const onSubmit = async (data: FormData) => {
     try {
+      let payload: any = {
+        email: data.email,
+        password: data.password,
+      };
+
+      if (isRegister) {
+        payload = {
+          ...payload,
+          name: data.name,
+          role: data.role || 'client',
+        };
+      }
+
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
-      const res = await api.post(endpoint, data);
+      const res = await api.post(endpoint, payload);
+
+
+      if (isRegister) {
+        toast.success('Account created successfully! Please log in.');
+
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+
+        reset(); 
+        setIsRegister(false); 
+        return; 
+      }
+
       login(res.data.access_token, res.data.user);
-      toast.success('Login successful!');
-      window.location.href = '/';
+      toast.success('Logged in successfully!');
+
+      if (res.data.user.role === 'client') {
+        router.push('/providers');
+      } else {
+        router.push('/availability'); 
+      }
+
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Error');
+      const msg = err.response?.data?.message;
+      toast.error(
+        Array.isArray(msg) ? msg.join(', ') : msg || 'Something went wrong'
+      );
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
+  return (    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-900 to-black">
       <div className="w-full max-w-md p-10 bg-gray-900 rounded-3xl shadow-2xl border border-gray-800">
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4">

@@ -1,3 +1,4 @@
+// app/(protected)/page.tsx
 'use client';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { User } from '../../types/index';
+import { User } from '../../../types/index';
 import Link from 'next/link';
 
 export default function ProvidersPage() {
@@ -34,7 +35,6 @@ export default function ProvidersPage() {
     <div>
       <h1 className="text-4xl font-bold mb-8">Available Providers</h1>
 
-      {/* Filters */}
       <div className="flex gap-4 mb-6">
         <Input placeholder="Search name/email..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-80" />
         <Select value={sort} onValueChange={(value) => setSort(value || 'name:asc')}>
@@ -71,7 +71,6 @@ export default function ProvidersPage() {
         </TableBody>
       </Table>
 
-      {/* Pagination buttons */}
       <div className="flex gap-4 mt-8">
         <Button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
         <Button onClick={() => setPage(page + 1)}>Next</Button>

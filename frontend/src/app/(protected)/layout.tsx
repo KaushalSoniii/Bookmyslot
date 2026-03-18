@@ -31,7 +31,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         <nav className="space-y-2 flex-1">
           {isClient ? (
             <>
-              <Button variant="ghost" className="w-full justify-start" onClick={() => router.push('/')}>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => router.push('/providers')}>
                 <Users className="mr-3" /> Browse Providers
               </Button>
               <Button variant="ghost" className="w-full justify-start" onClick={() => router.push('/my-bookings')}>

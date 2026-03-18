@@ -13,11 +13,13 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const exists = await this.usersService.findByEmail(dto.email);
+    const { name, email, password, role = 'client' } = dto;
+
+    const exists = await this.usersService.findByEmail(email);
     if (exists) throw new ConflictException('Email already exists');
 
-    const hashed = await bcrypt.hash(dto.password, 10);
-    const user = await this.usersService.create({ ...dto, password: hashed });
+    const hashed = await bcrypt.hash(password, 10);
+    const user = await this.usersService.create({ name, email, password: hashed, role });
 
     const payload = { sub: user._id, email: user.email, role: user.role };
     return { access_token: this.jwtService.sign(payload), user };
