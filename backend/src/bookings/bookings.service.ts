@@ -58,12 +58,14 @@ export class BookingsService {
     const provider = await this.usersService.findById(dto.providerId);
     const client = await this.usersService.findById(clientId);
 
-    // Re-check overlap
     const overlap = await this.bookingModel.findOne({
       provider: dto.providerId,
       status: 'confirmed',
       $or: [
-        { startTime: { $lt: new Date(dto.endTime) }, endTime: { $gt: new Date(dto.startTime) } },
+        {
+          startTime: { $lt: new Date(dto.endTime) },
+          endTime: { $gt: new Date(dto.startTime) },
+        },
       ],
     });
 
@@ -76,28 +78,31 @@ export class BookingsService {
       endTime: new Date(dto.endTime),
     });
 
-    // Send emails
-    await this.mailService.sendBookingConfirmation(
-      client.email,
-      {
-        startTime: booking.startTime,
-        endTime: booking.endTime,
-        providerName: provider.name,
-        clientName: client.name,   
-      },
-      'client'          
-    );
+    try {
+      await this.mailService.sendBookingConfirmation(
+        client.email,
+        {
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          providerName: provider.name,
+          clientName: client.name,
+        },
+        'client'
+      );
 
-    await this.mailService.sendBookingConfirmation(
-      provider.email,
-      {
-        startTime: booking.startTime,
-        endTime: booking.endTime,
-        providerName: provider.name,
-        clientName: client.name,
-      },
-      'provider'  
-    );
+      await this.mailService.sendBookingConfirmation(
+        provider.email,
+        {
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          providerName: provider.name,
+          clientName: client.name,
+        },
+        'provider'
+      );
+    } catch (err) {
+      console.error('Email failed:', err.message);
+    }
 
     return booking;
   }

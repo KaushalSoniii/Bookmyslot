@@ -27,16 +27,21 @@ export default function BookPage() {
 
   const bookMutation = useMutation({
     mutationFn: async (slot: any) => {
-      await api.post('/bookings', {
+        return await api.post('/bookings', {
         providerId,
         startTime: slot.startTime,
         endTime: slot.endTime,
-      });
+        });
     },
     onSuccess: () => {
-      toast.success('Booking confirmed! Email sent to both.');
-      queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
-      setSelectedSlot(null);
+        console.log('SUCCESS TRIGGERED');
+        toast.success('Booking confirmed! Email sent to both.');
+        queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
+        setSelectedSlot(null);
+    },
+    onError: (err: any) => {
+        console.error(err);
+        toast.error(err?.response?.data?.message || 'Booking failed');
     },
   });
 
