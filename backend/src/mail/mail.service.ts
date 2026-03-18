@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
+import { formatDate } from 'date-fns';
 
 
 @Injectable()
@@ -30,7 +31,7 @@ export class MailService {
       
       <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <p><strong>Date:</strong> ${new Date(details.startTime).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-        <p><strong>Time:</strong> ${formateTime(details.startTime)} – ${formatTime(details.endTime)}</p>
+        <p><strong>Time:</strong> ${formatTime(details.startTime)} – ${formatTime(details.endTime)}</p>
         <p><strong>With:</strong> ${otherParty}</p>
         ${isClient ? `<p><strong>Location/Mode:</strong> Online / In-person (as agreed)</p>` : ''}
       </div>
@@ -49,13 +50,13 @@ export class MailService {
     from: this.config.get<string>('MAIL_FROM'),
     to,
     subject: isClient 
-      ? `Your Booking Confirmed - ${formatDate(details.startTime)}` 
-      : `New Booking from ${details.clientName} - ${formatDate(details.startTime)}`,
+      ? `Your Booking Confirmed - ${formatDate(details.startTime, 'MMM dd, yyyy')}` 
+      : `New Booking from ${details.clientName} - ${formatDate(details.startTime, 'MMM dd, yyyy')}`,
     html,
   });
 }
 }
 
-function formatTime(endTime: any) {
-  throw new Error('Function not implemented.');
+function formatTime(date: any): string {
+  return new Date(date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
