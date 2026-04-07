@@ -4,6 +4,9 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { format } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import { parse, startOfWeek, getDay } from 'date-fns';
+import { dateFnsLocalizer } from 'react-big-calendar';
 import api from '@/lib/axios';
 import { Booking } from '@/types/index';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,19 +21,13 @@ const BigCalendar = dynamic(
     loading: () => (
       <div className="space-y-3">
         <Skeleton className="h-12 w-full rounded-lg" />
-        <Skeleton className="h-[500px] w-full rounded-xl" />
+        <Skeleton className="h-125 w-full rounded-xl" />
       </div>
     ),
   },
 );
 
-// Dynamic import for localizer too
-const { dateFnsLocalizer } = await import('react-big-calendar').catch(() => ({ dateFnsLocalizer: null }));
-
-import localeData from 'date-fns/locale/en-US';
-import { parse, startOfWeek, getDay } from 'date-fns';
-
-const locales = { 'en-US': localeData };
+const locales = { 'en-US': enUS };
 
 async function fetchSchedule() {
   const res = await api.get('/bookings/schedule');
@@ -43,14 +40,10 @@ export default function SchedulePage() {
     queryFn: fetchSchedule,
   });
 
-  const localizer = useMemo(() => {
-    try {
-      const { dateFnsLocalizer: loc } = require('react-big-calendar');
-      return loc({ format, parse, startOfWeek, getDay, locales });
-    } catch {
-      return null;
-    }
-  }, []);
+  const localizer = useMemo(
+    () => dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales }),
+    [],
+  );
 
   const events = useMemo(
     () =>
@@ -82,23 +75,19 @@ export default function SchedulePage() {
       {isLoading ? (
         <div className="space-y-3">
           <Skeleton className="h-12 w-full rounded-lg" />
-          <Skeleton className="h-[500px] w-full rounded-xl" />
-        </div>
-      ) : !localizer ? (
-        <div className="text-center py-20 text-muted-foreground">
-          Calendar failed to load. Please refresh the page.
+          <Skeleton className="h-125 w-full rounded-xl" />
         </div>
       ) : (
         <div className="rbc-wrapper rounded-xl border border-border overflow-hidden bg-card">
           <BigCalendar
             localizer={localizer}
             events={events}
-            startAccessor="start"
-            endAccessor="end"
+            startAccessor={(event: any) => event.start}
+            endAccessor={(event: any) => event.end}
             style={{ height: 600 }}
             views={['month', 'week', 'day', 'agenda']}
             defaultView="month"
-            tooltipAccessor={(event) => event.title}
+            tooltipAccessor={(event: any) => event.title}
             eventPropGetter={() => ({
               className: 'rbc-custom-event',
             })}
