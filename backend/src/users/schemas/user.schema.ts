@@ -6,19 +6,26 @@ export type UserDocument = User & Document;
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
-  name: string;
+  name!: string;
 
-  @Prop({ required: true, unique: true })
-  email: string;
+  @Prop({ required: true, unique: true, index: true })  // ← index added
+  email!: string;
 
-  @Prop({ required: true })
-  password: string;
+  @Prop({ required: true, select: false })  // ← select:false hides password by default
+  password!: string;
 
-  @Prop({ required: true, enum: ['client', 'provider'] })
-  role: 'client' | 'provider';
+  @Prop({ default: 'client', enum: ['client', 'provider'] })
+  role!: 'client' | 'provider';
 
-  @Prop({ type: Object, default: null })
-  availability: {
+  @Prop({
+    type: {
+      days: [String],
+      startHour: Number,
+      endHour: Number,
+    },
+    default: null,
+  })
+  availability!: {
     days: string[];
     startHour: number;
     endHour: number;

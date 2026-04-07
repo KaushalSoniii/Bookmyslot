@@ -111,7 +111,7 @@ export default function MyBookingsPage() {
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div className="space-y-2.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm flex-shrink-0">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm shrink-0">
                           {otherName.charAt(0).toUpperCase()}
                         </div>
                         <div>

@@ -36,7 +36,7 @@ function ProviderCard({ provider }: { provider: User }) {
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
           {/* Avatar */}
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-semibold text-lg">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-semibold text-lg">
             {initials}
           </div>
 

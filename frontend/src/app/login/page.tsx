@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { log } from 'console';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -48,7 +49,12 @@ export default function LoginPage() {
       const res = await api.post('/auth/login', values);
       login(res.data.access_token, res.data.user);
       toast.success(`Welcome back, ${res.data.user.name}!`);
-      router.push('/providers');
+      router.push('/my-bookings');
+      if(res.data.user?.role === "client"){
+        router.push('/providers');
+      }else if(res.data.user?.role === "provider"){
+        router.push('/my-bookings');
+      }
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Invalid email or password');
     } finally {
@@ -62,7 +68,7 @@ export default function LoginPage() {
       const res = await api.post('/auth/register', values);
       login(res.data.access_token, res.data.user);
       toast.success(`Welcome to BookMySlot, ${res.data.user.name}!`);
-      router.push('/providers');
+      setMode("login")
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -73,7 +79,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel — Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/20 via-primary/10 to-background flex-col items-center justify-center p-12 border-r border-border">
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-primary/20 via-primary/10 to-background flex-col items-center justify-center p-12 border-r border-border">
         <div className="max-w-md text-center space-y-6">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 mb-2">
             <CalendarClock className="w-10 h-10 text-primary" />

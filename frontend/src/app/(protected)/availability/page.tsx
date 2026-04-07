@@ -182,7 +182,7 @@ export default function AvailabilityPage() {
                         <select
                           value={field.value}
                           onChange={(e) => field.onChange(Number(e.target.value))}
-                          className="w-full h-10 rounded-lg border border-input bg-transparent px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50"
+                          className="w-full h-10 rounded-lg border border-input bg-white text-black px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50"
                         >
                           {HOURS.slice(0, 23).map((h) => (
                             <option key={h} value={h}>{hourLabel(h)}</option>
@@ -204,7 +204,7 @@ export default function AvailabilityPage() {
                         <select
                           value={field.value}
                           onChange={(e) => field.onChange(Number(e.target.value))}
-                          className="w-full h-10 rounded-lg border border-input bg-transparent px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50"
+                          className="w-full h-10 rounded-lg border border-input bg-white text-black px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50"
                         >
                           {HOURS.slice(1).map((h) => (
                             <option key={h} value={h}>{hourLabel(h)}</option>

@@ -1,33 +1,37 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsString, Max, Min } from 'class-validator';
 
 export class UpdateAvailabilityDto {
   @ApiProperty({
-    description: 'Array of weekday names when the provider is available',
+    description: 'Weekday names when the provider is available',
     example: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
     type: [String],
   })
-  @IsArray({ message: 'days must be an array' })
-  @IsString({ each: true, message: 'Each day must be a string' })
-  days: string[];
+  @IsArray()
+  @IsString({ each: true })
+  days!: string[];
 
   @ApiProperty({
-    description: 'Starting hour (24-hour format, integer)',
+    description: 'Start hour in 24h format (0–23)',
     example: 9,
     minimum: 0,
     maximum: 23,
   })
-  @IsNumber({}, { message: 'startHour must be a number' })
+  @IsNumber()
   @IsNotEmpty()
-  startHour: number;
+  @Min(0)
+  @Max(23)
+  startHour!: number;
 
   @ApiProperty({
-    description: 'Ending hour (24-hour format, integer) — must be greater than startHour',
+    description: 'End hour in 24h format (1–24), must be greater than startHour',
     example: 17,
     minimum: 1,
     maximum: 24,
   })
-  @IsNumber({}, { message: 'endHour must be a number' })
+  @IsNumber()
   @IsNotEmpty()
-  endHour: number;
+  @Min(1)
+  @Max(24)
+  endHour!: number;
 }
