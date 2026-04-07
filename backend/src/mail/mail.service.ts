@@ -5,8 +5,7 @@ import { ConfigService } from '@nestjs/config';
 interface BookingDetails {
   startTime: string | Date;
   endTime: string | Date;
-  providerName: string;
-  clientName: string;
+  otherParty: string;
 }
 
 @Injectable()
@@ -15,18 +14,16 @@ export class MailService {
 
   constructor(private config: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      host: this.config.get<string>('MAIL_HOST'),
-      port: this.config.get<number>('MAIL_PORT'),
-      secure: false,
+      service: 'gmail',
       auth: {
-        user: this.config.get<string>('MAIL_USER'),
-        pass: this.config.get<string>('MAIL_PASS'),
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
   }
 
   async sendBookingConfirmation(to: string, details: BookingDetails ) {
-    if (!details || !details.startTime || !details.endTime || !details.providerName) {
+    if (!details || !details.startTime || !details.endTime || !details.otherParty) {
       throw new Error('Invalid booking details provided');
     }
 
@@ -41,8 +38,8 @@ export class MailService {
       <h2>✅ Booking Confirmed - BookMySlot</h2>
       <p><strong>Date:</strong> ${startDate.toLocaleDateString()}</p>
       <p><strong>Time:</strong> ${startDate.toLocaleTimeString()} - ${endDate.toLocaleTimeString()}</p>
-      <p><strong>With:</strong> ${details.providerName}</p>
-      <p>Thank you! ${details.clientName} for using our services.</p>
+      <p><strong>With:</strong> ${details.otherParty}</p>
+      <p>Thank you! for using our services.</p>
     `;
 
     try {

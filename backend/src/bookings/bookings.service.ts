@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MailService } from '../mail/mail.service';
@@ -8,6 +14,8 @@ import { Booking, BookingDocument } from './schemas/booking.schema';
 
 @Injectable()
 export class BookingsService {
+  private readonly logger = new Logger(BookingsService.name);
+
   constructor(
     @InjectModel(Booking.name) private bookingModel: Model<BookingDocument>,
     private usersService: UsersService,
@@ -16,34 +24,43 @@ export class BookingsService {
 
   async getAvailability(providerId: string, dateStr: string) {
     const provider = await this.usersService.findById(providerId);
-    if (!provider || !provider.availability) return [];
+    if (!provider?.availability) return [];
 
     const date = new Date(dateStr);
     const dayName = date.toLocaleString('en-US', { weekday: 'long' });
 
     if (!provider.availability.days.includes(dayName)) return [];
 
-    const startH = provider.availability.startHour;
-    const endH = provider.availability.endHour;
-    const freeSlots: any[] = [];
+    // Build day range
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
 
-    for (let h = startH; h < endH; h++) {
+    // ONE query for all existing bookings that day — fixes the N+1 problem
+    const existingBookings = await this.bookingModel.find({
+      provider: new Types.ObjectId(providerId),
+      status: 'confirmed',
+      startTime: { $gte: dayStart, $lte: dayEnd },
+    });
+
+    const { startHour, endHour } = provider.availability;
+    const freeSlots: { startTime: string; endTime: string }[] = [];
+
+    for (let h = startHour; h < endHour; h++) {
       for (let m = 0; m < 60; m += 30) {
         const slotStart = new Date(date);
         slotStart.setHours(h, m, 0, 0);
 
-        const slotEnd = new Date(slotStart);
-        slotEnd.setMinutes(m + 30);
+        const slotEnd = new Date(date);
+        slotEnd.setHours(h, m + 30, 0, 0);
 
-        const overlap = await this.bookingModel.findOne({
-          provider: new Types.ObjectId(providerId),
-          status: 'confirmed',
-          $or: [
-            { startTime: { $lt: slotEnd }, endTime: { $gt: slotStart } },
-          ],
-        });
+        // Check overlap in memory — no DB call in the loop
+        const overlaps = existingBookings.some(
+          (b) => b.startTime < slotEnd && b.endTime > slotStart,
+        );
 
-        if (!overlap) {
+        if (!overlaps) {
           freeSlots.push({
             startTime: slotStart.toISOString(),
             endTime: slotEnd.toISOString(),
@@ -51,15 +68,19 @@ export class BookingsService {
         }
       }
     }
+
     return freeSlots;
   }
 
   async createBooking(clientId: string, dto: CreateBookingDto) {
-    const provider = await this.usersService.findById(dto.providerId);
-    const client = await this.usersService.findById(clientId);
+    const [provider, client] = await Promise.all([
+      this.usersService.findById(dto.providerId),
+      this.usersService.findById(clientId),
+    ]);
 
+    // Check overlap — cast providerId to ObjectId correctly
     const overlap = await this.bookingModel.findOne({
-      provider: dto.providerId,
+      provider: new Types.ObjectId(dto.providerId),
       status: 'confirmed',
       $or: [
         {
@@ -69,60 +90,94 @@ export class BookingsService {
       ],
     });
 
-    if (overlap) throw new BadRequestException('Slot already booked');
+    if (overlap) throw new BadRequestException('This slot is already booked');
 
     const booking = await this.bookingModel.create({
-      client: clientId,
-      provider: dto.providerId,
+      client: new Types.ObjectId(clientId),
+      provider: new Types.ObjectId(dto.providerId),
       startTime: new Date(dto.startTime),
       endTime: new Date(dto.endTime),
+      status: 'confirmed',
     });
 
-    try {
-      await this.mailService.sendBookingConfirmation(
-        client.email,
-        {
-          startTime: booking.startTime,
-          endTime: booking.endTime,
-          providerName: provider.name,
-          clientName: client.name,
-        },
-      );
-
-      await this.mailService.sendBookingConfirmation(
-        provider.email,
-        {
-          startTime: booking.startTime,
-          endTime: booking.endTime,
-          providerName: provider.name,
-          clientName: client.name,
-        },
-      );
-    } catch (err) {
-      console.error(
-        'Email failed:',
-        err instanceof Error ? err.message : String(err),
-      );
-    }
+    void Promise.allSettled([
+      this.mailService.sendBookingConfirmation(client.email, {
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        otherParty: provider.name,
+      }),
+      this.mailService.sendBookingConfirmation(provider.email, {
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        otherParty: client.name,
+      }),
+    ]).then((results) => {
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          this.logger.error(`Email ${i + 1} failed: ${r.reason}`);
+        }
+      });
+    });
 
     return booking;
   }
 
-  async getMyBookings(userId: string) {
-    return this.bookingModel
-      .find({ $or: [{ client: userId }, { provider: userId }] })
-      .populate('client provider', 'name email')
-      .exec();
+  async getMyBookings(userId: string, page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+
+    const filter = { $or: [{ client: new Types.ObjectId(userId) }, { provider: new Types.ObjectId(userId) }] };
+
+    const [bookings, total] = await Promise.all([
+      this.bookingModel
+        .find(filter)
+        .populate('client provider', 'name email')
+        .sort({ startTime: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.bookingModel.countDocuments(filter),
+    ]);
+
+    return {
+      bookings,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getSchedule(userId: string) {
     return this.bookingModel
-      .find({ $or: [{ client: userId }, { provider: userId }] })
-      .populate('client provider', 'name')
+      .find({
+        $or: [{ client: new Types.ObjectId(userId) }, { provider: new Types.ObjectId(userId) }],
+        status: { $ne: 'cancelled' },
+      })
+      .populate('client provider', 'name email')
+      .sort({ startTime: 1 })
       .exec();
   }
 
-  async cancelBooking(id: string) {
-    return this.bookingModel.findByIdAndDelete(id);
+  async cancelBooking(id: string, userId: string) {
+    const booking = await this.bookingModel.findById(id);
+    if (!booking) throw new NotFoundException('Booking not found');
+
+    // Verify the requester owns this booking
+    const isOwner =
+      booking.client.toString() === userId ||
+      booking.provider.toString() === userId;
+
+    if (!isOwner) {
+      throw new ForbiddenException('You can only cancel your own bookings');
+    }
+
+    if (booking.status === 'cancelled') {
+      throw new BadRequestException('Booking is already cancelled');
+    }
+
+    return this.bookingModel.findByIdAndUpdate(
+      id,
+      { status: 'cancelled' },
+      { new: true },
+    );
   }
 }
