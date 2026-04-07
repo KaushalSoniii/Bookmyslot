@@ -87,7 +87,6 @@ export class BookingsService {
           providerName: provider.name,
           clientName: client.name,
         },
-        'client'
       );
 
       await this.mailService.sendBookingConfirmation(
@@ -98,10 +97,12 @@ export class BookingsService {
           providerName: provider.name,
           clientName: client.name,
         },
-        'provider'
       );
     } catch (err) {
-      console.error('Email failed:', err.message);
+      console.error(
+        'Email failed:',
+        err instanceof Error ? err.message : String(err),
+      );
     }
 
     return booking;

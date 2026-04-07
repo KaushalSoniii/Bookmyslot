@@ -5,7 +5,8 @@ import { ConfigService } from '@nestjs/config';
 interface BookingDetails {
   startTime: string | Date;
   endTime: string | Date;
-  otherParty: string;
+  providerName: string;
+  clientName: string;
 }
 
 @Injectable()
@@ -24,8 +25,8 @@ export class MailService {
     });
   }
 
-  async sendBookingConfirmation(to: string, details: BookingDetails) {
-    if (!details || !details.startTime || !details.endTime || !details.otherParty) {
+  async sendBookingConfirmation(to: string, details: BookingDetails ) {
+    if (!details || !details.startTime || !details.endTime || !details.providerName) {
       throw new Error('Invalid booking details provided');
     }
 
@@ -40,8 +41,8 @@ export class MailService {
       <h2>✅ Booking Confirmed - BookMySlot</h2>
       <p><strong>Date:</strong> ${startDate.toLocaleDateString()}</p>
       <p><strong>Time:</strong> ${startDate.toLocaleTimeString()} - ${endDate.toLocaleTimeString()}</p>
-      <p><strong>With:</strong> ${details.otherParty}</p>
-      <p>Thank you!</p>
+      <p><strong>With:</strong> ${details.providerName}</p>
+      <p>Thank you! ${details.clientName} for using our services.</p>
     `;
 
     try {
