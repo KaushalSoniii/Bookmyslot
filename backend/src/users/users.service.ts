@@ -39,12 +39,23 @@ export class UsersService {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    return this.userModel
+    const numericLimit = Number(limit);
+    const numericPage = Number(page);
+    const total = await this.userModel.countDocuments(filter);
+    const users = await this.userModel
       .find(filter)
       .sort(sortObj)
       .skip(skip)
-      .limit(Number(limit))
+      .limit(numericLimit)
       .exec();
+
+    return {
+      users,
+      total,
+      page: numericPage,
+      limit: numericLimit,
+      totalPages: Math.ceil(total / numericLimit),
+    };
   }
 
   async updateAvailability(userId: string, dto: UpdateAvailabilityDto) {

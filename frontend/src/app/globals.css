@@ -127,3 +127,138 @@
     @apply font-sans;
   }
 }
+
+/* ─── Add this at the BOTTOM of your existing globals.css ─── */
+
+/* react-big-calendar — override default styles to match dark theme */
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+.rbc-wrapper .rbc-calendar {
+  font-family: var(--font-sans);
+  background: transparent;
+  color: hsl(var(--foreground));
+}
+
+.rbc-wrapper .rbc-toolbar {
+  padding: 12px 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.rbc-wrapper .rbc-toolbar button {
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 13px;
+  background: transparent;
+  transition: all 0.15s;
+}
+
+.rbc-wrapper .rbc-toolbar button:hover {
+  background: hsl(var(--muted));
+}
+
+.rbc-wrapper .rbc-toolbar button.rbc-active {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+}
+
+.rbc-wrapper .rbc-toolbar-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.rbc-wrapper .rbc-month-view,
+.rbc-wrapper .rbc-time-view,
+.rbc-wrapper .rbc-agenda-view {
+  border: none;
+}
+
+.rbc-wrapper .rbc-header {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  font-size: 12px;
+  padding: 8px;
+  border-color: hsl(var(--border));
+}
+
+.rbc-wrapper .rbc-today {
+  background: hsl(var(--primary) / 0.08);
+}
+
+.rbc-wrapper .rbc-off-range-bg {
+  background: hsl(var(--muted) / 0.3);
+}
+
+.rbc-wrapper .rbc-day-bg + .rbc-day-bg,
+.rbc-wrapper .rbc-header + .rbc-header {
+  border-color: hsl(var(--border));
+}
+
+.rbc-wrapper .rbc-month-row + .rbc-month-row {
+  border-color: hsl(var(--border));
+}
+
+.rbc-wrapper .rbc-event,
+.rbc-wrapper .rbc-custom-event {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.rbc-wrapper .rbc-event:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.rbc-wrapper .rbc-show-more {
+  color: hsl(var(--primary));
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rbc-wrapper .rbc-agenda-view table.rbc-agenda-table {
+  border-color: hsl(var(--border));
+}
+
+.rbc-wrapper .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+  border-color: hsl(var(--border));
+  padding: 10px 12px;
+}
+
+.rbc-wrapper .rbc-agenda-view table.rbc-agenda-table .rbc-agenda-date-cell,
+.rbc-wrapper .rbc-agenda-view table.rbc-agenda-table .rbc-agenda-time-cell {
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
+
+.rbc-wrapper .rbc-time-content {
+  border-color: hsl(var(--border));
+}
+
+.rbc-wrapper .rbc-timeslot-group {
+  border-color: hsl(var(--border));
+  min-height: 40px;
+}
+
+.rbc-wrapper .rbc-time-gutter .rbc-timeslot-group {
+  border: none;
+}
+
+.rbc-wrapper .rbc-label {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  padding: 0 8px;
+}
+
+.rbc-wrapper .rbc-current-time-indicator {
+  background: hsl(var(--primary));
+  height: 2px;
+}
